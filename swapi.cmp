@@ -1,0 +1,52 @@
+<!-- Ubicacion para almacenar nuevos gastos desde expenseForm (matriz de objeto expenses) -->
+<aura:component controller="SwapiController" implements="force:appHostable,flexipage:availableForAllPageTypes" access="global">
+    
+    <!--Agregando el atributo controller estoy relacionando el componente con el contolador apex -->
+
+    
+    <aura:attribute name="contacts" type="Contact"/>    
+    <!-- CAMPOS ESTABLECIDOS DE FORMA PREDETERMINADA ACA SE AGREGARIAN LOS OBJECT FIELDS -->
+    
+
+    <!-- do init lo envia a la base de datos de salesforce directamente? (VER)-->
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}"/> 
+   
+    <!-- updateExpense lo manda al objeto Expense__c ¿¿¿¿y handleUpdateExpense???-->
+    <aura:handler name="updateContact" event="c:swapiItemUpdate"
+                  action="{!c.handleUpdateContact}"/>
+    
+    <aura:handler name="createContact" event="c:swapiItemUpdate"
+                  action="{!c.handleCreateContact}"/>
+         <!-- HASTA ACA OK --> 
+    <!-- PAGE HEADER -->
+    <lightning:layout class="slds-page-header slds-page-header_object-home">
+        <lightning:layoutItem>
+            <lightning:icon iconName="standard:scan_card" alternativeText="My Expenses"/>
+        </lightning:layoutItem>
+        <lightning:layoutItem padding="horizontal-small">
+            <div class="page-section page-header">
+                <h1 class="slds-text-heading_label">STAR WARS</h1>
+                <h2 class="slds-text-heading_medium">UNIT TEST</h2>
+            </div>
+        </lightning:layoutItem>
+    </lightning:layout>
+    <!-- / PAGE HEADER -->
+    <!-- NEW EXPENSE FORM -->
+    <lightning:layout>
+        <lightning:layoutItem padding="around-small" size="6">
+            <c:swapiForm/>
+        </lightning:layoutItem>
+    </lightning:layout>
+    <!-- / NEW EXPENSE FORM -->
+    <lightning:layout>
+    <lightning:layoutItem padding="around-small" size="6">
+        <c:swapiList contacts="{!v.contacts}"/>
+    </lightning:layoutItem>
+    <lightning:layoutItem padding="around-small" size="6">
+        Put something cool here
+    </lightning:layoutItem>
+</lightning:layout>
+    
+    
+    
+</aura:component>
