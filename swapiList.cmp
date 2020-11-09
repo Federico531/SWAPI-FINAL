@@ -1,0 +1,14 @@
+<!-- componente que muestra la lista de gastos-->
+
+<aura:component>
+    <aura:attribute name="contacts" type="Contact"/>
+    <lightning:card title="Contacts">
+        <p class="slds-p-horizontal_small">
+            
+            <!-- itera por cada uno de ellos para crear por cada uno un expense item-->
+            <aura:iteration items="{!v.contacts}" var="contact">
+                <c:swapiItem contact="{!contact}"/>
+            </aura:iteration>
+        </p>
+    </lightning:card>
+</aura:component>
