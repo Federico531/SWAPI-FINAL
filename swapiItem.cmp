@@ -1,0 +1,52 @@
+<aura:component>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="formatdate" type="Date"/>
+    <aura:attribute name="contact" type="Contact"/>
+    <!-- Si reimbursed es true el slds theme es success-->
+    <!-- hay que agregar register event para que funcione -->
+    <aura:registerEvent name="updateContact" type="c:swapiItemUpdate"/>
+    <lightning:card title="{!v.contact.Name}" iconName="standard:scan_card"
+                    class="{!v.contact.Reimbursed__c ?
+                           'slds-theme_success' : ''}">
+        
+        <p class="slds-text-heading_medium slds-p-horizontal_small">
+            Altura: <lightning:formattedNumber value="{!v.contact.Height__c}"   />
+        </p>
+        
+        <!-- CORREGIR ESTILOS SLDS DE ACAPARA ABAJO -->
+        <p class="slds-truncate"> Género:
+            <ui:outputText value="{!v.contact.Gender__c}"/>
+        </p>
+        <p class="slds-truncate"> Color de cabello:
+            <ui:outputText value="{!v.contact.Haircolor__c}"/>
+        </p>
+        <p class="slds-truncate"> Color de Ojos:
+            <ui:outputText value="{!v.contact.Eyecolor__c}"/>
+        </p>
+        <p class="slds-truncate"> URL:
+            <ui:outputText value="{!v.contact.URL__c}"/>
+        </p>
+        
+        <p class="slds-truncate"> Planeta:
+            <ui:outputText value="{!v.contact.Planet__c}"/>
+        </p>
+        
+        <p class="slds-truncate"> # de Personaje:
+            <ui:outputText value="{!v.contact.Characternumber__c}"/>
+        </p>
+        
+        
+        
+        <p> 
+            <lightning:input type="toggle"
+                             label="Género"
+                             name="Género"
+                             class="slds-p-around_small"
+                             checked="{!v.contact.Reimbursed__c}"
+                             messageToggleActive="Male"
+                             messageToggleInactive="Female"
+                             onchange="{!c.clickReimbursed}"/>
+        </p>
+      
+    </lightning:card>
+</aura:component>
