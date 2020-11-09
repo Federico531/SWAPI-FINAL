@@ -1,0 +1,84 @@
+public with sharing class SwapiController {
+    
+       	// Llamada a la API
+    @AuraEnabled
+   	public static String llamarALaApi(String valorABuscar, String dato) {
+        
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://swapi.dev/api/'+ dato + '/' + valorABuscar +'/');    
+        request.setMethod('GET');
+        request.setHeader('Accept', 'application/json');
+        request.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        HttpResponse response = http.send(request);
+        
+        String respuesta;		 
+        
+        // Si la solicitud es exitosa, analizo la respuesta JSON.
+        if (response.getStatusCode() == 200) {            
+            respuesta = response.getBody();           
+        }
+        else {
+            //c1.add('No se recibio la respuesta');        
+        }        
+        return respuesta;
+    }
+    @AuraEnabled
+    public static List<Contact> getContact() {
+        // Perform isAccessible() checking first, then
+        return [SELECT Id, 
+                Name,Height__c,Gender__c,Haircolor__c,Eyecolor__c,URL__c,Planet__c,Characternumber__c
+                FROM Contact];
+    } 
+    @AuraEnabled
+    
+    //FUNCIONA, AGREGA CUENTA, TENGO QUE HACER QUE AGREGUE CONTACTO Y QUE TOME LOS 
+    //DATOS DESDE EL INPUT FIELD
+    /*
+public static Contact saveContact(Contact contact) {
+Account acct = new Account(Name='Acme', Phone='(415)555-1212', NumberOfEmployees=100);
+// Insert the account by using DML
+insert acct;
+// Perform isUpdateable() checking first, then
+upsert acct;
+return contact;
+} 
+
+*/
+    
+    public static Contact saveContact(Contact contact) {
+        //ESTO FUNCIONA PERO TENGO QUE INSTANCIAR LOS DATOS DEL FORM PARA QUE LOS INGRESE AL OBJETO
+        // Create a list of contacts
+        Contact contacto = new Contact(Height__c= contact.Height__c,
+                                       Eyecolor__c= contact.Eyecolor__c,
+                                       URL__c= contact.URL__c,
+                                       Haircolor__c=contact.Haircolor__c,
+                                       Gender__c= contact.Gender__c, 
+                                       Characternumber__c= contact.Characternumber__c,
+                                       FirstName= contact.Name,
+                                       LastName= contact.Name);       
+        upsert contacto;
+        
+        return contact;
+    } 
+    
+    
+    //Esto trae la lista de contactos desde la base de datos
+    @AuraEnabled
+    public static List<Contact> getContacts() {
+        // Check to make sure all fields are accessible to this user
+        String[] fieldsToCheck = new String[] {
+            'Name','Height__c','Gender__c','Haircolor__c','Eyecolor__c','URL__c','Planet__c','Characternumber__c'
+                };
+                    Map<String,Schema.SObjectField> fieldDescribeTokens =
+                    Schema.SObjectType.Contact.fields.getMap();
+        for(String field : fieldsToCheck) {
+            if( ! fieldDescribeTokens.get(field).getDescribe().isAccessible()) {
+                throw new System.NoAccessException();
+            }
+        }
+        // OK, they're cool, let 'em through
+        return [SELECT Name,Height__c,Gender__c,Haircolor__c,Eyecolor__c,URL__c,Planet__c,Characternumber__c
+                FROM Contact];
+    }
+}
