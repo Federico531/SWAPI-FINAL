@@ -2,10 +2,20 @@
     createContact: function(component, newContact) {
         let createEvent = component.getEvent("createContact");
         createEvent.setParams({ "contact": newContact});
+        
+        var tst = $A.get("e.force:showToast");
+        tst.setParams({
+            'title' : 'Éxito',
+            'message' : 'Contacto Guardado',
+            'type' : 'success',
+            'duration' : 8000,
+            'mode' : 'dismissible'
+        });
+        
+        if(newContact){
+            tst.fire();
+        }
         createEvent.fire();
-                        console.log(createEvent);
-
-
     },
     insertData: function(component, valorABuscar, respuesta) {
         
@@ -13,7 +23,7 @@
         var nombre = JSON.parse(respuesta).name;      
         var altura = JSON.parse(respuesta).height;
         var genero = JSON.parse(respuesta).gender;
-        var colorCabello = JSON.parse(respuesta).skin_color;
+        var colorCabello = JSON.parse(respuesta).hair_color;
         var colorOjos = JSON.parse(respuesta).eye_color;
         var url = JSON.parse(respuesta).url;
         var planeta = JSON.parse(respuesta).homeworld;
@@ -21,30 +31,36 @@
         let valores = [id, nombre, altura, genero, colorCabello, colorOjos, url];
         let nuevosValores = []
         
-        // Recorro los valores, si alguno es "n/a" o "unknow" mando lo campos vacios
+        // Itero por los valores que declaré en el form 
+        // si alguno es "unknow" o "n/a" lo campos vacios se muestran vacios
+        
         for(var i=0; i<valores.length; i++){
-            if(valores[i] === "n/a" || valores[i] === "unknown"){
+            console.log(valores[i]);
+            if( valores[i] === "unknown" || valores[i] === "n/a" || valores[i] === "none"){
+                
                 valores[i] = "";               
                 nuevosValores.push(valores[i]);
             } else {
                 nuevosValores.push(valores[i]);                
             }
         }
-
-        component.set('v.newContact.IDCharacter__c', nuevosValores[0]);
-        component.set('v.newContact.LastName', nuevosValores[1]);
+        
+        // Aca finalmente lleno cada campo con el valor que introduje al array, este vacio o completo
+        
+        component.set('v.newContact.Characternumber__c', nuevosValores[0]);
+        component.set('v.newContact.Name', nuevosValores[1]);
         component.set('v.newContact.Height__c', nuevosValores[2]);         
         component.set('v.newContact.Gender__c', nuevosValores[3]);
         component.set('v.newContact.Haircolor__c', nuevosValores[4]);
         component.set('v.newContact.Eyecolor__c', nuevosValores[5]);
         component.set('v.newContact.URL__c', nuevosValores[6]);
-              
-        //******************** CODIGO PARA OBTENER EL PLANETA ***********************
         
-        var valor = planeta.slice(29,-1); // Manipulo el string y obtengo el numero del planeta        
+        //************Obtener planeta*************
+        
+        // Corto el string para obtener numero de planeta       
+        var valor = planeta.slice(29,-1);
         var dato = 'planets';
         
-        // Crear la accion
         var action = component.get("c.llamarALaApi");
         
         action.setParams({
@@ -52,7 +68,7 @@
             "dato": dato
         });
         
-        // Agregar comportamiento de la callback para cuando se recibe la respuesta
+        //Genero un callback para que la aplicación no se detenga mientras recibo los datos
         action.setCallback(this, function(response) {
             
             var state = response.getState();
@@ -61,37 +77,31 @@
                 var res = response.getReturnValue();
                 var planet = JSON.parse(res).name;
                 
-                // Si el planeta es desconocido mando el campo vacio
                 if(planet === "unknown"){
                     planet = "";
                 }
                 
                 component.set('v.newContact.Homeworld__c', planet);                
-
-        		//Deshabilito los campos que estan vacios
-        		component.find("contactform").forEach(function(valor) {
-           		if(valor.get("v.value") !== ""){
-                    valor.set("v.disabled", true);
-                } else {           		
-                    valor.set("v.disabled", false);
-                	}
-        		});         
-                        
-        	}
+                
+                //Deshabilito los campos completos
+                
+                component.find("contactform").forEach(function(valor) {
+                    if(valor.get("v.value") !== ""){
+                        valor.set("v.disabled", true);
+                    } else {           		
+                        valor.set("v.disabled", false);
+                    }
+                });         
+                
+            }
             else {
-                console.log("Falló con el estado planeta: " + state);
+                console.log("Falló con el estado planet: " + state);
             }
         });   
         
         // Enviar acción para ejecutar
         $A.enqueueAction(action); 
-         
-       	
-        //***************** FIN CODIGO PARA OBTENER EL PLANETA ************************
         
-    }  
+    }     
     
-    
-    //hasta aca anda
-   
 })
