@@ -1,6 +1,7 @@
 ({
- clickCreate: function(component, event, helper) {
 
+    clickCreate: function(component, event, helper) {
+        
         //component.find('aura:id')
         let validContact = component.find('contactform').reduce(function (validSoFar, inputCmp) {
             // Displays error messages for invalid fields
@@ -8,8 +9,9 @@
             return validSoFar && inputCmp.get('v.validity').valid;
         }, true);
         // If we pass error checking, do some real work
+        
         if(validContact){
-            // Create the new contact
+            // Crear nuevo contacto
             let newContact = component.get("v.newContact");
             console.log("Create Character: " + JSON.stringify(newContact));
             helper.createContact(component, newContact);
@@ -17,46 +19,56 @@
     },
     buscar : function(component, event, helper) {      
         
-        // Verifico si obtengo bien el valor desde el campo		       
-        var valorABuscar = component.find('expenseformID').get('v.value'); //Obtengo el valor (ID) a buscar en la API
         
-        //**** PRUEBA 
+        // Obtengo el valor (ID) a buscar en la API      
+        var valorABuscar = component.find('expenseformID').get('v.value'); 
         
-        //**** FIN PRUEBA
+        //validacion para que traiga solo personajes que existan desde la API
         
-        //validacion para que trainga solo personajes que existan desde la API
-        if(valorABuscar >= 1 && valorABuscar <89){ // INICIO DEL IF GENERAL DE VALIDACION DE ID        
-        
-        var dato = 'people';
-
-        // Hago la llamada al metodo del controlador APEX (ContactController)
-        var action = component.get("c.llamarALaApi");
-        
-        action.setParams({
-            "valorABuscar": valorABuscar,
-            "dato": dato
+        // Valida el ID ingresado
+        var tst = $A.get("e.force:showToast");
+        tst.setParams({
+            'title' : 'ERROR',
+            'message' : 'Ingrese un valor Entre 1 y 88',
+            'type' : 'error',
+            'duration' : 8000,
+            'mode' : 'dismissible'
         });
+        if(valorABuscar >= 1 && valorABuscar <89){       
+            
+            var dato = 'people';
+            
+            // Hago la llamada al metodo del controlador APEX (SwapiController)
+            var action = component.get("c.llamarALaApi");
+            
+            action.setParams({
+                "valorABuscar": valorABuscar,
+                "dato": dato
+            });
+            
+            // Esto genera una respuesta asíncrona mientras espera la respuesta de la API
+            action.setCallback(this, function(response) {
                 
-        // Agregar comportamiento de la callback para cuando se recibe la respuesta
-        action.setCallback(this, function(response) {
+                var state = response.getState();
+                
+                if (state === "SUCCESS") {
+                    
+                    // Habilito el boton guardar luego de recibir los datos de la API
+                    let button = component.find('saveButton');
+                    button.set('v.disabled', false);                  
+                    
+                    var respuesta = response.getReturnValue();
+                    helper.insertData(component, valorABuscar, respuesta);
+                }
+                else {
+                    console.log("Falló con el estado: " + state);
+                }                    
+            });
+            // Enviar acción para ejecutarse
+            $A.enqueueAction(action);
             
-        var state = response.getState();
-            
-        if (state === "SUCCESS") {
-            // Habilito el boton guardar, ya que se hizo la llamada a la API
-            let button = component.find('saveButton');
-            button.set('v.disabled', false);                  
-           
-            var respuesta = response.getReturnValue();
-            helper.insertData(component, valorABuscar, respuesta);
-        }
-        else {
-            console.log("Falló con el estado: " + state);
-        }                    
-        });
-        // Enviar acción para ejecutar
-        $A.enqueueAction(action);
-        
-        } // FIN DEL IF GENERAL DE VALIDACION DE ID VALIDO
-	}
+        }else{
+            tst.fire();
+        } 
+    }
 })
